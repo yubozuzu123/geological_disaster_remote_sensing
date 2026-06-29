@@ -135,9 +135,9 @@ def main():
     print(f"P={p:.3f}  R={r:.3f}  F1={f1:.3f}  IoU={iou:.3f}")
     print("=" * 60)
 
-    # 生成三联图可视化
-    print("\n生成三联图...")
-    os.makedirs('./detections_simple', exist_ok=True)
+    # 生成可视化结果图
+    print("\n生成结果图...")
+    os.makedirs('./可视化结果', exist_ok=True)
 
     # 按滑坡占比排序，选择代表性样本
     sample_data = []
@@ -173,7 +173,7 @@ def main():
         pred_color[fp] = [255, 0, 0]
         pred_color[fn] = [0, 255, 0]
 
-        # 绘制三联图
+        # 绘制结果图
         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
         axes[0].imshow(img_np)
         axes[0].set_title('图像', fontsize=14)
@@ -185,13 +185,13 @@ def main():
         axes[2].set_title('提取结果', fontsize=14)
         axes[2].axis('off')
         plt.tight_layout()
-        plt.savefig(f'./detections_simple/triplet_{i:03d}.png',
+        plt.savefig(f'./可视化结果/triplet_{i:03d}.png',
                    dpi=150, bbox_inches='tight')
         plt.close()
 
-    print(f"保存了 {len(selected)} 个三联图到 ./detections_simple/")
+    print(f"保存了 {len(selected)} 个结果图到 ./可视化结果/")
 
-    # 总结
+
     print("\n" + "=" * 60)
     print("测试完成！")
     print("=" * 60)

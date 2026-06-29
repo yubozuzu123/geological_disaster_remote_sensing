@@ -104,12 +104,12 @@ class HighRecallCombinedLoss(nn.Module):
 # ============================================================
 
 class LandslideDataset(Dataset):
-    def __init__(self, data_roots, splits=['train'], augment=True, img_size=256):
+    def __init__(self, data_config, augment=True, img_size=256):
+        """data_config: 字典 {数据目录: [splits列表]}，不同数据集可用不同split"""
         self.augment = augment
         self.img_size = img_size
         self.items = []
-        # 扫描所有数据目录
-        for root in data_roots:
+        for root, splits in data_config.items():
             for split in splits:
                 img_dir = os.path.join(root, split, 'images')
                 lbl_dir = os.path.join(root, split, 'labels')
@@ -186,7 +186,7 @@ def evaluate(model, loader, device):
 # ============================================================
 
 def main():
-    # 命令行参数（默认值为已验证的最佳配置，直接运行 python train.py 即可）
+    # 命令行参数
     parser = argparse.ArgumentParser(description='滑坡分割 - 训练 MobileUNet')
     parser.add_argument('--epochs', type=int, default=150, help='训练轮数 (默认: 150)')
     parser.add_argument('--lr', type=float, default=0.0001, help='学习率 (默认: 0.0001)')
@@ -207,35 +207,19 @@ def main():
 
     # 数据集路径
     # 训练集：横断2008(train) + 横断2018(train+val) + 汶川(train+val)
-    # 验证集/测试集：横断2008(val) — 横断2008的val不参与训练，保证测试公平
+    # 验证集/测试集：横断2008(val)
 
     print("\n构建数据集...")
-    train_dataset = LandslideDataset(
-        data_roots=[
-            './landslide_data/横断_2008',  # 只用train部分
-            './landslide_data/横断_2018',
-            './landslide_data/汶川',
-        ],
-        splits=['train'],
-        augment=True,
-    )
-    # 横断2018和汶川的val也加入训练
-    train_dataset_extra = LandslideDataset(
-        data_roots=[
-            './landslide_data/横断_2018',
-            './landslide_data/汶川',
-        ],
-        splits=['val'],
-        augment=True,
-    )
-    train_dataset.items.extend(train_dataset_extra.items)
-    print(f"训练集总计: {len(train_dataset.items)} samples")
+    
+    train_dataset = LandslideDataset({
+        './landslide_data/横断_2008': ['train'],
+        './landslide_data/横断_2018': ['train', 'val'],
+        './landslide_data/汶川': ['train', 'val'],
+    }, augment=True)
 
-    val_dataset = LandslideDataset(
-        data_roots=['./landslide_data/横断_2008'],
-        splits=['val'],
-        augment=False,
-    )
+    val_dataset = LandslideDataset({
+        './landslide_data/横断_2008': ['val'],
+    }, augment=False)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args.bs)
     # 创建模型
