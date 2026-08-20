@@ -1,0 +1,8 @@
+# Python 3.13.9
+# Python版本请先通过Conda创建，pip不会通过requirements.txt安装Python。
+
+numpy==2.5.2
+scipy==1.18.0
+rasterio==1.5.1
+geopandas==1.1.4
+shapely==2.1.2
